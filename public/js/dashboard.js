@@ -1,4 +1,4 @@
-document.getElementById("calendarLink").addEventListener("click", () => {
+document.getElementById("timelogLink").addEventListener("click", () => {
   fetch("/api/timelog/view")
     .then((response) => response.text())
     .then((html) => {
