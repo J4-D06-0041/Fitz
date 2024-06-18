@@ -20,7 +20,7 @@ app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/payrate", require("./routes/payrate"));
 app.use("/api/main", require("./routes/dashboard"));
-app.use("/api/calendar", require("./routes/calendar"));
+app.use("/api/timelog", require("./routes/timelog"));
 app.use("/api/pay", require("./routes/pay"));
 
 // Serve static files from the public directory
