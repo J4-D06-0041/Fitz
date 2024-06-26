@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 class UserController {
   constructor() {}
@@ -79,35 +80,37 @@ class UserController {
   }
 
   async addUser(userObject) {
-    try {
-      // Check if the user already exists
-      let user = await User.findOne({ username: userObject.username });
-      if (user) {
-        return res.status(400).json({ msg: "User already exists" });
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Check if the user already exists
+        let user = await User.findOne({ username: userObject.username });
+        if (user) {
+          return reject({ msg: "User already exists" });
+        }
+
+        // Create a new user
+        user = new User({
+          firstName: userObject.firstName,
+          lastName: userObject.lastName,
+          email: userObject.email,
+          role: userObject.role,
+          timezone: userObject.timezone,
+          username: userObject.username,
+          password: userObject.password,
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(userObject.password, salt);
+
+        // Save the user to the database
+        await user.save();
+
+        resolve(user);
+      } catch (error) {
+        console.error(error);
+        reject("Server error", error);
       }
-
-      // Create a new user
-      user = new User({
-        firstName: userObject.firstName,
-        lastName: userObject.lastName,
-        email: userObject.email,
-        role: userObject.role,
-        timezone: userObject.timezone,
-        username: userObject.username,
-        password: userObject.password,
-      });
-
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(user.password, salt);
-
-      // Save the user to the database
-      await user.save();
-
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    });
   }
 }
 

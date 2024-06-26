@@ -16,13 +16,15 @@ router.post("/register", async (req, res) => {
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
-
-    userController.addUser(firstName, lastName, email, role, timezone, username, password);
-
-    res.json({ msg: "User registered successfully" });
+    try {
+      let savedUser = await userController.addUser({ firstName, lastName, email, role, timezone, username, password });
+      res.json({ msg: "User registered successfully" });
+    } catch (error) {
+      res.status(500).send(`Server error ${error}`);
+    }
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(500).send(`Server error ${err}`);
   }
 });
 
