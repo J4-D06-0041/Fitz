@@ -2,44 +2,41 @@ const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 const moment = require("moment");
 
-exports.logAttendance = async (req, res) => {
-  const { loginTime, logoutTime } = req.body;
+class AttendanceController {
+  constructor() {}
 
-  try {
-    const duration = moment(logoutTime).diff(moment(loginTime), "hours");
+  async logAttendance(userId, loginTime, logoutTime, dateCreated, dateUpdated) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const attendance = new Attendance({
+          user: userId,
+          loginTime,
+          logoutTime,
+          dateCreated,
+          dateUpdated,
+        });
 
-    const attendance = new Attendance({
-      user: req.user.id,
-      loginTime,
-      logoutTime,
-      duration,
+        await attendance.save();
+
+        return attendance;
+      } catch (err) {
+        console.error(err.message);
+        return err;
+      }
     });
-
-    await attendance.save();
-
-    res.json(attendance);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
   }
-};
 
-exports.getUserAttendance = async (req, res) => {
-  try {
-    const attendance = await Attendance.find({ user: req.params.userId }).populate("user", ["username"]);
-    res.json(attendance);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+  async getUserAttendance(userId) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const attendance = await Attendance.find({ user: userId }).populate("user", ["username"]);
+        res.json(attendance);
+      } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server error");
+      }
+    });
   }
-};
+}
 
-exports.getTeamAttendance = async (req, res) => {
-  try {
-    const attendance = await Attendance.find().populate("user", ["username"]);
-    res.json(attendance);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-};
+module.exports = new AttendanceController();

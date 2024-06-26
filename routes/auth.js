@@ -70,4 +70,8 @@ router.get("/register", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/register.html"));
 });
 
+router.get("/logout", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/pages/logout.html"));
+});
+
 module.exports = router;

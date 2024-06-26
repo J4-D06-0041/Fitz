@@ -5,6 +5,5 @@ const { logAttendance, getUserAttendance, getTeamAttendance } = require("../cont
 
 router.post("/log", authMiddleware, logAttendance);
 router.get("/user/:userId", authMiddleware, getUserAttendance);
-router.get("/team", authMiddleware, getTeamAttendance);
 
 module.exports = router;

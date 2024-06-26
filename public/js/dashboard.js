@@ -20,3 +20,11 @@ document.getElementById("dashboardLink").addEventListener("click", () => {
         <p>Select an option from the sidebar to get started.</p>
     `;
 });
+
+document.getElementById("logoutLink").addEventListener("click", () => {
+  fetch("/api/auth/logout")
+    .then((response) => response.text())
+    .then((html) => {
+      document.getElementById("content").innerHTML = html;
+    });
+});
