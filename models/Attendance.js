@@ -4,9 +4,11 @@ const AttendanceSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: true,
   },
   loginTime: {
     type: Date,
+    required: true,
   },
   logoutTime: {
     type: Date,
@@ -14,9 +16,13 @@ const AttendanceSchema = new mongoose.Schema({
   totalTime: {
     type: Number,
   },
-  date: {
+  dateCreated: {
     type: Date,
-    default: Date.now,
+    required: true,
+  },
+  dateUpdated: {
+    type: Date,
+    required: true,
   },
 });
 
