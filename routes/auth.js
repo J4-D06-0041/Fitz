@@ -4,7 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const userController = require("../controllers/userController")
+const userController = require("../controllers/userController");
 
 // Register a new user
 router.post("/register", async (req, res) => {
@@ -17,21 +17,10 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    user = new User({
-      firstName,
-      lastName,
-      email,
-      role,
-      timezone,
-      username,
-      password,
-    });
+    userController = new userController();
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
-    await user.save();
-
+    userController.addUser(firstName, lastName, email, role, timezone, username, password);
+ 
     res.json({ msg: "User registered successfully" });
   } catch (err) {
     console.error(err.message);
@@ -56,6 +45,9 @@ router.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
+    //add login time
+    //add entry to attendance table
+
 
     const payload = {
       user: {

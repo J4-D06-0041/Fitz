@@ -28,6 +28,7 @@ exports.updateUser = async (req, res) => {
   const userFields = { username, role };
 
   try {
+    await User.find({});
     let user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -58,8 +59,25 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+exports.deleteUserByUsername = async (req, res) => {
+  try {
+    let user = await User.find({username: req.params.username});
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    await User.findByIdAndRemove({username: req.params.username});
+
+    res.json({ msg: "User removed" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
+
 exports.addUser = async (req, res) => {
-  const { username, password, role } = req.body;
+  const { firstName, lastName, email, role, timezone, username, password  } = req.body;
 
   try {
     // Check if the user already exists
@@ -70,10 +88,17 @@ exports.addUser = async (req, res) => {
 
     // Create a new user
     user = new User({
+      firstName,
+      lastName,
+      email,
+      role,
+      timezone,
       username,
       password,
-      role,
     });
+    
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
 
     // Save the user to the database
     await user.save();
