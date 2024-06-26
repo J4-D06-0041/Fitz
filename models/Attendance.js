@@ -15,15 +15,21 @@ const AttendanceSchema = new mongoose.Schema({
   },
   totalTime: {
     type: Number,
-  },
-  dateCreated: {
+  }, 
+  phTime: {
     type: Date,
     required: true,
   },
-  dateUpdated: {
-    type: Date,
-    required: true,
-  },
+  // dateCreated: {
+  //   type: Date,
+  //   required: true,
+  //   default: Date.now,
+  // },
+  // dateUpdated: {
+  //   type: Date,
+  //   required: true,
+  //   default: Date.now,
+  // },
 });
 
 module.exports = mongoose.model("Attendance", AttendanceSchema);
