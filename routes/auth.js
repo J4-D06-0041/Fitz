@@ -17,10 +17,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    userController = new userController();
-
     userController.addUser(firstName, lastName, email, role, timezone, username, password);
- 
+
     res.json({ msg: "User registered successfully" });
   } catch (err) {
     console.error(err.message);
@@ -47,7 +45,6 @@ router.post("/login", async (req, res) => {
     }
     //add login time
     //add entry to attendance table
-
 
     const payload = {
       user: {
