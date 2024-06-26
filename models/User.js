@@ -32,6 +32,10 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  timezone: {
+    type: Number,
+    required: true
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);

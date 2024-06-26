@@ -11,6 +11,9 @@ const AttendanceSchema = new mongoose.Schema({
   logoutTime: {
     type: Date,
   },
+  totalTime: {
+    type: Number,
+  },
   date: {
     type: Date,
     default: Date.now,

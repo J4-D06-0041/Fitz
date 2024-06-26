@@ -6,6 +6,7 @@ async function register(event) {
   const lastName = document.getElementById("lastname").value;
   const email = document.getElementById("email").value;
   const role = document.getElementById("role").value;
+  const timezone = document.getElementById('timezone').value;
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
@@ -14,7 +15,7 @@ async function register(event) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ firstName, lastName, email, role, username, password }),
+    body: JSON.stringify({ firstName, lastName, email, role, timezone, username, password }),
   });
 
   const data = await response.json();
