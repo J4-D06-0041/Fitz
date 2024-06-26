@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const userController = require("../controllers/userController");
+const Attendance = require("../models/Attendance");
+const moment = require("moment-timezone");
 
 // Register a new user
 router.post("/register", async (req, res) => {
@@ -47,8 +49,28 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
     //add login time
-    //add entry to attendance table
+    const userOffset = user.timezone;
+    const phTime = moment().tz('Asia/Singapore').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss');
+    const tzConverter =- 8;
+    const userTime = moment().utcOffset(userOffset * 60).subtract(tzConverter, 'hours').format('YYYY-MM-DD HH:mm:ss');
+    const attendance = new Attendance({
+      user: user.id,
+      loginTime: userTime,
+      phTime: phTime
+    });
 
+
+    //add entry to attendance table
+    await attendance.save();
+    
+    // for logout:
+
+    // const logoutTime = moment.tz(Date.now(), user.timezone);
+    // attendance.logoutTime = logoutTime;
+    // attendance.totalTime = moment.duration(logoutTime.diff(attendance.loginTime)).asHours();
+
+    // await attendance.save();
+    
     const payload = {
       user: {
         id: user.id,
@@ -61,7 +83,9 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
+    console.log(err);
     res.status(500).send("Server Error");
+    
   }
 });
 
