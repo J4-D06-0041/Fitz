@@ -50,27 +50,24 @@ router.post("/login", async (req, res) => {
     }
     //add login time
     const userOffset = user.timezone;
-    const phTime = moment().tz('Asia/Singapore').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss');
+    const phTimeLogin = moment().tz('Asia/Singapore').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss');
     const tzConverter =- 8;
-    const userTime = moment().utcOffset(userOffset * 60).subtract(tzConverter, 'hours').format('YYYY-MM-DD HH:mm:ss');
+    const userTimeLogin = moment().utcOffset(userOffset * 60).subtract(tzConverter, 'hours').format('YYYY-MM-DD HH:mm:ss');
     const attendance = new Attendance({
       user: user.id,
-      loginTime: userTime,
-      phTime: phTime
+      loginTime: userTimeLogin,
+      phTimeLogin: phTimeLogin,
+      logoutTime: null,
+      phTimeLogout: null,
+      totalTime: 0,
     });
 
 
     //add entry to attendance table
     await attendance.save();
     
-    // for logout:
+    console.log("Updated attendance record:", attendance);
 
-    // const logoutTime = moment.tz(Date.now(), user.timezone);
-    // attendance.logoutTime = logoutTime;
-    // attendance.totalTime = moment.duration(logoutTime.diff(attendance.loginTime)).asHours();
-
-    // await attendance.save();
-    
     const payload = {
       user: {
         id: user.id,
@@ -86,6 +83,58 @@ router.post("/login", async (req, res) => {
     console.log(err);
     res.status(500).send("Server Error");
     
+  }
+});
+
+//logout
+router.post("/logout", async (req, res) => {
+  const { username } = req.body;
+  console.log("logout", username);
+
+  try {
+    let user = await User.findOne({ username });
+
+    if (!user) {
+      console.log("User not found");
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    const attendance = await Attendance.findOne({ user: user.id, logoutTime: null });
+    if (!attendance) {
+      console.log("No attendance record found for user:", user.id);
+      return res.status(400).json({ msg: "No attendance record found" });
+    }
+    console.log("Attendance record found:", attendance);
+
+    // add logout time
+    const userOffset = user.timezone;
+    const phTimeLogout = moment().tz('Asia/Singapore').add(8, 'hours').format('YYYY-MM-DD HH:mm:ss');
+    const tzConverter =- 8;
+    const userTimeLogout = moment().utcOffset(userOffset * 60).subtract(tzConverter, 'hours').format('YYYY-MM-DD HH:mm:ss');
+
+    console.log("phTimeLogout:", phTimeLogout);
+    console.log("userTimeLogout:", userTimeLogout);
+
+    // Calculate total time
+    const loginTime = moment(attendance.loginTime);
+    const logoutTime = moment(userTimeLogout);
+    const totalTime = moment.duration(logoutTime.diff(loginTime)).asHours();
+
+    console.log("Calculated totalTime:", totalTime);
+
+    attendance.logoutTime = userTimeLogout;
+    attendance.phTimeLogout = phTimeLogout;
+    attendance.totalTime = totalTime;
+    
+    await attendance.save();
+
+    console.log("Updated attendance record:", attendance);
+
+
+    res.json({ msg: "User logged out successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 });
 

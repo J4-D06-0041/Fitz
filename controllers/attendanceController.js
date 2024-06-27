@@ -5,13 +5,16 @@ const moment = require("moment");
 class AttendanceController {
   constructor() {}
 
-  async logAttendance(userId, loginTime, logoutTime, dateCreated, dateUpdated) {
+  async logAttendance(userId, loginTime, logoutTime, totalTime, phTimeLogin, phTimeLogout, dateCreated, dateUpdated) {
     return new Promise(async (resolve, reject) => {
       try {
         const attendance = new Attendance({
           user: userId,
           loginTime,
           logoutTime,
+          totalTime,
+          phTimeLogin,
+          phTimeLogout,
           dateCreated,
           dateUpdated,
         });

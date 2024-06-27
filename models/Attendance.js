@@ -12,13 +12,19 @@ const AttendanceSchema = new mongoose.Schema({
   },
   logoutTime: {
     type: Date,
+    default: null,
   },
   totalTime: {
     type: Number,
+    default: 0,
   }, 
-  phTime: {
+  phTimeLogin: {
     type: Date,
     required: true,
+  },
+  phTimeLogout: {
+    type: Date,
+    default: null,
   },
   // dateCreated: {
   //   type: Date,
