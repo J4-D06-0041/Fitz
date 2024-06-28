@@ -28,3 +28,15 @@ document.getElementById("logoutLink").addEventListener("click", () => {
       document.getElementById("content").innerHTML = html;
     });
 });
+
+// retrives user role of the logged in user
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    console.log("Fetching user role");
+    const response = await axios.get("/api/users/get-user-role");
+    console.log("User role:", JSON.stringify(response.data));
+    const { role } = response.data;
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+  }
+});
