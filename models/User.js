@@ -34,8 +34,16 @@ const UserSchema = new mongoose.Schema({
   },
   timezone: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
+  auth: {
+    token: {
+      type: String,
+    },
+    expiry: {
+      type: Date,
+    },
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);
