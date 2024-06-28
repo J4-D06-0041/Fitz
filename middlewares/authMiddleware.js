@@ -1,10 +1,11 @@
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header("x-auth-token");
+  const token = req.cookies.token; // Accessing the token stored in cookies
 
   if (!token) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
+    res.sendFile(path.join(__dirname, "../public/pages/public/unauthorized.html"));
   }
 
   try {
@@ -12,7 +13,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
+    res.sendFile(path.join(__dirname, "../public/pages/public/unauthorized.html"));
   }
 };
 
