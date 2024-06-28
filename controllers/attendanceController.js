@@ -21,10 +21,10 @@ class AttendanceController {
 
         await attendance.save();
 
-        return attendance;
+        resolve(attendance);
       } catch (err) {
         console.error(err.message);
-        return err;
+        reject(err);
       }
     });
   }

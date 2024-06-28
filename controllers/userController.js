@@ -5,78 +5,88 @@ class UserController {
   constructor() {}
 
   async getAllUsers() {
-    try {
-      const users = await User.find().select("-password");
-      res.json(users);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    return new Promise(async (resolve, reject) => {
+      try {
+        const users = await User.find().select("-password");
+        resolve(users);
+      } catch (error) {
+        console.error(err.message);
+        reject("Server error", error);
+      }
+    });
   }
 
   async getUserById(userId) {
-    try {
-      const user = await User.findById(req.params.id).select("-password");
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const user = await User.findById(userId);
+        if (!user) {
+          resolve(null);
+        }
+        resolve(user);
+      } catch (err) {
+        console.error(err.message);
+        reject(err.message);
       }
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    });
   }
 
   async updateUser(userObject) {
-    const { username, role } = req.body;
-    const userFields = { irstName, lastName, email, role, timezone, username, password };
+    return new Promise(async (resolve, reject) => {
+      const { username, role } = req.body;
+      const userFields = { firstName, lastName, email, role, timezone, username, password };
 
-    try {
-      await User.find({});
-      let user = await User.findById(userObject.id);
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+      try {
+        await User.find({});
+        let user = await User.findById(userObject.id);
+        if (!user) {
+          reject("user not found");
+        }
+
+        user = await User.findByIdAndUpdate(userObject.id, { $set: userFields }, { new: true });
+
+        resolve(user);
+      } catch (error) {
+        console.error(err.message);
+        reject("Server error", error);
       }
-
-      user = await User.findByIdAndUpdate(userObject.id, { $set: userFields }, { new: true });
-
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    });
   }
 
   async deleteUser(userId) {
-    try {
-      let user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+    return new Promise(async (resolve, reject) => {
+      try {
+        let user = await User.findById(userId);
+        if (!user) {
+          reject("user not found");
+        }
+
+        await User.findByIdAndRemove(userId);
+
+        resolve("User removed");
+      } catch (error) {
+        console.error(err.message);
+        reject("Server error", error);
       }
-
-      await User.findByIdAndRemove(userId);
-
-      res.json({ msg: "User removed" });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    });
   }
 
   async deleteUserByUsername(username) {
-    try {
-      let user = await User.find({ username: username });
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+    return new Promise(async (resolve, reject) => {
+      try {
+        let user = await User.find({ username: username });
+        if (!user) {
+          reject("User not found");
+        }
+
+        await User.findByIdAndRemove({ username: username });
+
+        resolve("User removed");
+      } catch (error) {
+        console.error(err.message);
+        reject("Server error", error);
       }
-
-      await User.findByIdAndRemove({ username: username });
-
-      res.json({ msg: "User removed" });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server error");
-    }
+    });
   }
 
   async addUser(userObject) {
@@ -110,6 +120,15 @@ class UserController {
         console.error(error);
         reject("Server error", error);
       }
+    });
+  }
+
+  updateUserToken(userId, token, expiry) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await User.findByIdAndUpdate(userId, { token, expiry }, { new: true });
+        resolve();
+      } catch (error) {}
     });
   }
 }
