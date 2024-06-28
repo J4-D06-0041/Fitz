@@ -1,33 +1,37 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const userController = require("../controllers/userController");
+const userService = require("../services/userService");
 const Attendance = require("../models/Attendance");
 const moment = require("moment-timezone");
 const authMiddleware = require("../middlewares/authMiddleware");
+const logger = require("../logger");
+let attendanceService = require("../services/attendanceService");
+const mongoose = require("mongoose");
 
 // Register a new user
 router.post("/register", async (req, res) => {
-  const { firstName, lastName, email, role, timezone, username, password } = req.body;
+  const { firstName, lastName, email, role, username, password, userTimezone, clientTimezone } = req.body;
 
   try {
-    let user = await User.findOne({ username });
+    let user = await userService.getUserByUsername(username);
 
     if (user) {
-      return res.status(400).json({ msg: "User already exists" });
+      return res.status(400).send({ msg: "User already exists" });
     }
     try {
-      let userToSave = new User({ firstName, lastName, email, role, timezone, username, password });
-      let savedUser = await userController.addUser(userToSave);
-      res.json({ msg: "User registered successfully" });
+      let userToSave = { firstName, lastName, email, role, username, password, userTimezone, clientTimezone };
+      let savedUser = await userService.addUser(userToSave);
+
+      res.status(200).send({ msg: "User registered successfully" });
     } catch (error) {
+      logger.error("inside trycatch", error);
       res.status(500).send(`Server error ${error}`);
     }
   } catch (err) {
-    console.error(err.message);
+    logger.error("auth.js", err);
     res.status(500).send(`Server error ${err}`);
   }
 });
@@ -38,7 +42,7 @@ router.post("/login", async (req, res) => {
   console.log("login", username, password);
 
   try {
-    let user = await User.findOne({ username });
+    let user = await userService.getUserByUsername(username);
 
     if (!user) {
       return res.status(401).send("Invalid credentials");
@@ -49,42 +53,29 @@ router.post("/login", async (req, res) => {
         return res.status(401).send("Invalid credentials");
       }
       //add login time
-      const userOffset = user.timezone;
-      const phTimeLogin = moment().tz("Asia/Singapore").add(8, "hours").format("YYYY-MM-DD HH:mm:ss");
-      const tzConverter = -8;
-      const userTimeLogin = moment()
-        .utcOffset(userOffset * 60)
-        .subtract(tzConverter, "hours")
-        .format("YYYY-MM-DD HH:mm:ss");
-      const attendance = new Attendance({
-        user: user.id,
-        loginTime: userTimeLogin,
-        phTimeLogin: phTimeLogin,
-        logoutTime: null,
-        phTimeLogout: null,
-        totalTime: 0,
-      });
+      let currentTime = moment().utc().toISOString();
+      let clientTimeZone = user.clientTimezone;
+      let clientTime = moment().utc().add(clientTimeZone, "hours").toISOString();
+      let userTimeZone = user.userTimezone;
+      let userTime = moment().utc().add(userTimeZone, "hours").toISOString();
+      let localTime = moment().tz("Asia/Singapore").add(8, "hours").toISOString();
 
-      //add entry to attendance table
-      await attendance.save();
-
-      console.log("Updated attendance record:", attendance);
+      const attendance = {
+        user: user._id,
+        clientLoginTime: clientTime,
+        userLoginTime: userTime,
+      };
+      let attendanceResponse = await attendanceService.logAttendance(attendance);
 
       const payload = {
         user: {
-          id: user.id,
+          id: user._id,
+          role: user.role,
         },
       };
 
-      // jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
-      //   if (err) throw err;
-      //   // On your server-side when setting the JWT:
-      //   // res.cookie("token", token, { httpOnly: true, secure: true }).status(200); // Use `secure: true` in production with HTTPS
-      //   res.cookie("token", token, { httpOnly: true, secure: true, path: "/", domain: "localhost" }).status(200);
-      // });
       jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
         if (err) {
-          console.error("Error signing token:", err);
           return res.status(500).send("Server Error");
         }
         res.cookie("token", token, { httpOnly: true, secure: true }); // secure: true should be used in production with HTTPS
@@ -92,8 +83,7 @@ router.post("/login", async (req, res) => {
       });
     }
   } catch (err) {
-    console.error(err.message);
-    console.log(err);
+    logger.error(err);
     res.status(500).send("Server Error", err);
   }
 });
@@ -154,7 +144,7 @@ router.post("/logout", authMiddleware, async (req, res) => {
 
 // Registration page
 router.get("/register", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/pages/register.html"));
+  res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
 });
 
 router.get("/logout", (req, res) => {
