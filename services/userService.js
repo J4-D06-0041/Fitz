@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const logger = require("../logger");
 
 class UserController {
   constructor() {}
@@ -34,7 +35,7 @@ class UserController {
   async getUserByUsername(username) {
     return new Promise(async (resolve, reject) => {
       try {
-        const user = await User.findOne({ username: username });
+        const user = await User.findOne({ username: username }).lean();
         resolve(user);
       } catch (error) {
         console.error(err.message);
@@ -130,7 +131,7 @@ class UserController {
 
         resolve(user);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         reject("Server error", error);
       }
     });
