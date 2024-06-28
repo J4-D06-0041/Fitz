@@ -6,29 +6,39 @@ async function register(event) {
   const lastName = document.getElementById("lastname").value;
   const email = document.getElementById("email").value;
   const role = document.getElementById("role").value;
-  const timezone = document.getElementById('timezone').value;
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-
-  const response = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ firstName, lastName, email, role, timezone, username, password }),
-  });
-
-  const data = await response.json();
-  console.log("data", data);
-  if (response.ok) {
-    // Registration successful
-    document.getElementById("message").innerText = "Registration successful! You can now log in.";
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 2000); // Redirect to login page after 2 seconds
-  } else {
-    // Registration failed
-    document.getElementById("message").innerText = data.msg;
+  const userTimezone = document.getElementById("userTimezone").value;
+  const clientTimezone = document.getElementById("clientTimezone").value;
+  try {
+    const response = await axios.post("/api/auth/register", {
+      firstName,
+      lastName,
+      email,
+      role,
+      username,
+      password,
+      userTimezone,
+      clientTimezone,
+    });
+    console.log("response", JSON.stringify(response));
+    const data = await response.data;
+    console.log("data", data);
+    if (response.status === 200) {
+      // Registration successful
+      document.getElementById("message").innerText = "Registration successful! You can now log in.";
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000); // Redirect to login page after 2 seconds
+    } else {
+      // Registration failed
+      document.getElementById("message").innerText = data.msg;
+    }
+  } catch (error) {
+    console.error("error main", error);
+    document.getElementById("message").innerText = `Registration failed. Please try again.\n${JSON.stringify(
+      error.response.data.msg
+    )}`;
   }
 }
 
