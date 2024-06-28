@@ -7,6 +7,7 @@ const path = require("path");
 const userController = require("../controllers/userController");
 const Attendance = require("../models/Attendance");
 const moment = require("moment-timezone");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 // Register a new user
 router.post("/register", async (req, res) => {
@@ -98,7 +99,7 @@ router.post("/login", async (req, res) => {
 });
 
 //logout
-router.post("/logout", async (req, res) => {
+router.post("/logout", authMiddleware, async (req, res) => {
   const { username } = req.body;
   console.log("logout", username);
 
