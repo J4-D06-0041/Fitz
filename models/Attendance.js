@@ -6,36 +6,31 @@ const AttendanceSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  loginTime: {
+  clientLoginTime: {
     type: Date,
     required: true,
   },
-  logoutTime: {
+  clientLogoutTime: {
     type: Date,
     default: null,
   },
-  totalTime: {
+  userLoginTime: {
+    type: Date,
+    required: true,
+  },
+  userLogoutTime: {
+    type: Date,
+    default: null,
+  },
+  dateCreated: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  totalWorkTime: {
     type: Number,
     default: 0,
-  }, 
-  phTimeLogin: {
-    type: Date,
-    required: true,
   },
-  phTimeLogout: {
-    type: Date,
-    default: null,
-  },
-  // dateCreated: {
-  //   type: Date,
-  //   required: true,
-  //   default: Date.now,
-  // },
-  // dateUpdated: {
-  //   type: Date,
-  //   required: true,
-  //   default: Date.now,
-  // },
 });
 
 module.exports = mongoose.model("Attendance", AttendanceSchema);
