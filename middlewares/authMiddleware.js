@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const logger = require("../logger");
 
 const authMiddleware = (req, res, next) => {
   const token = req.cookies.token; // Accessing the token stored in cookies
