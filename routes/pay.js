@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require("path");
 const authMiddleware = require("../middlewares/authMiddleware");
 
-router.get("/view", authMiddlewre, (req, res) => {
+router.get("/view", authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/pay.html"));
 });
 
