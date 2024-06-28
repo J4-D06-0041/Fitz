@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
-const { addPayrate, getPayrateByUserId, updatePayrate } = require("../controllers/payrateController");
+const { addPayrate, getPayrateByUserId, updatePayrate } = require("../services/payrateService");
 
 // Route to add a new pay rate
 router.post("/", authMiddleware, addPayrate);

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
-const { getAllUsers, getUserById, updateUser, deleteUser } = require("../controllers/userController");
+const { getAllUsers, getUserById, updateUser, deleteUser } = require("../services/userService");
 
 // Route to get all users
 router.get("/", authMiddleware, getAllUsers);
