@@ -36,7 +36,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     const response = await axios.get("/api/users/get-user-role");
     console.log("User role:", JSON.stringify(response.data));
     const { role } = response.data;
+
+    if(role !== "admin"){
+      document.getElementById("employeesLinkContainer").style.display = "none";
+    } else {
+      document.getElementById("employeesLinkContainer").style.display = "block";
+    } 
   } catch (error) {
     console.error("Error fetching user role:", error);
   }
+});
+
+document.getElementById("employeesLink").addEventListener("click", () => {
+  fetch("/api/employees/view")
+   .then((response) => response.text())
+   .then((html) => {
+      document.getElementById("content").innerHTML = html;
+    });
 });
