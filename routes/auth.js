@@ -140,6 +140,8 @@ router.post("/logout", authMiddleware, async (req, res) => {
 
     console.log("Updated attendance record:", attendance);
 
+    res.clearCookie("token");
+    
     res.json({ msg: "User logged out successfully" });
   } catch (err) {
     console.error(err.message);
