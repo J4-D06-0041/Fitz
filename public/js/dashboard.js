@@ -50,9 +50,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 document.getElementById("employeesLink").addEventListener("click", () => {
-  fetch("/api/users/register")
+  document.getElementById("content").innerHTML = `
+    <div class="container">
+      <h1>Register an account.</h1>
+      <button id="register-btn-id" class="btn btn-primary">Register</button>
+    </div>
+  `;
+
+  document.getElementById("register-btn-id").addEventListener("click", () => {
+    fetch("/api/users/register")
    .then((response) => response.text())
    .then((html) => {
       document.getElementById("content").innerHTML = html;
     });
+  });
 });
