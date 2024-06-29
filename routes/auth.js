@@ -70,7 +70,13 @@ router.post("/login", async (req, res) => {
       const payload = {
         user: {
           id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
           role: user.role,
+          username: user.username,
+          userTimezone: user.userTimezone,
+          clientTimezone: user.clientTimezone,
         },
       };
 
@@ -91,22 +97,21 @@ router.post("/login", async (req, res) => {
 //logout
 router.post("/logout", authMiddleware, async (req, res) => {
   const { username } = req.body;
-  console.log("logout", username);
 
   try {
-    let user = await User.findOne({ username });
+    let user = await userService.getUserByUsername(username);
 
     if (!user) {
-      console.log("User not found");
+      logger.info("User not found");
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    const attendance = await Attendance.findOne({ user: user.id, logoutTime: null });
+    const attendance = await attendanceService.getUserAttendance(user._id);
     if (!attendance) {
-      console.log("No attendance record found for user:", user.id);
+      logger.info("No attendance record found for user:", user.id);
       return res.status(400).json({ msg: "No attendance record found" });
     }
-    console.log("Attendance record found:", attendance);
+    logger.info("Attendance record found:", attendance);
 
     // add logout time
     const userOffset = user.timezone;
@@ -117,15 +122,15 @@ router.post("/logout", authMiddleware, async (req, res) => {
       .subtract(tzConverter, "hours")
       .format("YYYY-MM-DD HH:mm:ss");
 
-    console.log("phTimeLogout:", phTimeLogout);
-    console.log("userTimeLogout:", userTimeLogout);
+    logger.info("phTimeLogout:", phTimeLogout);
+    logger.info("userTimeLogout:", userTimeLogout);
 
     // Calculate total time
     const loginTime = moment(attendance.loginTime);
     const logoutTime = moment(userTimeLogout);
     const totalTime = moment.duration(logoutTime.diff(loginTime)).asHours();
 
-    console.log("Calculated totalTime:", totalTime);
+    logger.info("Calculated totalTime:", totalTime);
 
     attendance.logoutTime = userTimeLogout;
     attendance.phTimeLogout = phTimeLogout;
@@ -148,7 +153,7 @@ router.get("/register", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/pages/logout.html"));
+  res.sendFile(path.join(__dirname, "../public/pages/private/logout.html"));
 });
 
 router.get("/validate-token", (req, res) => {
