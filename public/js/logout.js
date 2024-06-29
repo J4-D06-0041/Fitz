@@ -32,11 +32,21 @@ async function fetchUserDetails() {
 }
 
 document.getElementById("logoutLink").addEventListener("click", async function () {
+  try { 
   const userDetails = await fetchUserDetails();
   console.log("userDetails", userDetails);
   setInterval(() => updateTime(userDetails.user.clientTimezone, userDetails.user.userTimezone), 1000);
-
   document.addEventListener("DOMContentLoaded", function () {
     updateTime(timezone);
   });
+  document.getElementById("logoutLink").addEventListener("click", function () {
+    const expirationDate = new Date();
+    expirationDate.setMinutes(expirationDate.getMinutes() - 1); 
+    const expirationDateString = expirationDate.toUTCString();
+    document.cookie = `token=; expires=${expirationDateString}; path=/;`;
+    window.location.href = "/";
+  });
+}catch (error){
+  console.error("Logout Error: ", error);
+}
 });
