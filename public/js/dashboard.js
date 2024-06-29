@@ -38,9 +38,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const { role } = response.data;
 
     if(role !== "admin"){
-      document.getElementById("employeesLinkContainer").style.display = "none";
-    } else {
+      console.log("hello")
       document.getElementById("employeesLinkContainer").style.display = "block";
+    } else {
+      console.log("hello1")
+      document.getElementById("employeesLinkContainer").style.display = "none";
     } 
   } catch (error) {
     console.error("Error fetching user role:", error);
@@ -48,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 document.getElementById("employeesLink").addEventListener("click", () => {
-  fetch("/api/employees/view")
+  fetch("/api/users/register")
    .then((response) => response.text())
    .then((html) => {
       document.getElementById("content").innerHTML = html;

@@ -4,6 +4,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { getAllUsers, getUserById, updateUser, deleteUser } = require("../services/userService");
 const logger = require("../logger");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 // Route to get all users
 router.get("/", authMiddleware, getAllUsers);
@@ -17,6 +18,11 @@ router.put("/:id", authMiddleware, updateUser);
 // Route to delete a user
 router.delete("/:id", authMiddleware, deleteUser);
 
+//Route to employees nav
+router.get("/register", authMiddleware, (req, res )=>{
+  res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
+}
+)
 router.get("/get-user-role", authMiddleware, (req, res) => {
   try {
     logger.info("Inside get-user-role");
