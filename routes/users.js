@@ -29,8 +29,7 @@ router.get("/get-user-role", authMiddleware, (req, res) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       logger.info(`decoded from get-user-role ${JSON.stringify(decoded)}`);
-      return res.status(200).send({ role: decoded.user.role });
-      // return res.status(200).send({ role: decoded.role });
+      return res.status(200).send(decoded);
     } catch (error) {
       logger.error(`error from get-user-role ${error}`);
       return res.status(401).send({ error: "Invalid token" });
