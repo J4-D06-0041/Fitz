@@ -31,7 +31,7 @@ class AttendanceController {
   async getUserAttendance(userId) {
     return new Promise(async (resolve, reject) => {
       try {
-        const attendance = await Attendance.find({ user: userId }).populate("user", ["username"]);
+        const attendance = await Attendance.find({ user: userId }).limit(1).sort({ dateCreated: -1 });
         res.json(attendance);
       } catch (err) {
         console.error(err.message);
