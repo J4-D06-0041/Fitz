@@ -1,0 +1,39 @@
+.clock {
+  font-family: "Orbitron", monospace; /* Digital font for the clock */
+  font-size: 36px; /* Adjusted font size */
+  color: #007bff; /* Bootstrap primary color */
+  background-color: #000; /* Black background for contrast */
+  border: 2px solid #007bff; /* Blue border to match the text color */
+  padding: 15px; /* Reduced padding */
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px; /* Ensure adequate height for the display */
+}
+
+/* Ensure that the container and row take full width */
+.container,
+.row {
+  width: 100%; /* Full width to avoid wrapping */
+  max-width: none; /* Overrides Bootstrap's max-width on the container if necessary */
+}
+
+/* Basic styles for page */
+body,
+h1,
+h3 {
+  font-family: "Arial", sans-serif; /* Consistent font for other texts */
+}
+
+/* Blinking colon animation for added digital clock effect */
+@keyframes blink {
+  50% {
+    color: transparent;
+  }
+}
+
+.clock::after {
+  content: ":";
+  animation: blink 1s step-start infinite;
+}

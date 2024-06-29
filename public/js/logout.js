@@ -14,9 +14,6 @@ function updateTime(clientTimezone, userTimezone) {
   // Specific timezone handling (e.g., for Singapore which is UTC+8)
   let localTime = new Date(now.getTime() + 8 * 3600 * 1000).toISOString();
 
-  console.log("UTC Time:", utcTime);
-  console.log("Client Time:", clientTime);
-  console.log("User Time:", userTime);
   document.getElementById("clientTime").innerText = clientTime;
   document.getElementById("userTime").innerText = userTime;
 }
