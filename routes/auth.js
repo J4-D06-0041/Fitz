@@ -158,6 +158,57 @@ router.get("/logout", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/private/logout.html"));
 });
 
+router.get("/logoutuser", (req, res) => {
+  logger.info("inside logoutuser");
+
+  // Decode the token to log it or use its data before clearing it
+  const token = req.cookies.token;
+  if (token) {
+    const decodedToken = jwt.decode(token);
+    logger.info('Decoded token:', decodedToken);
+  } else {
+    logger.info('No token found to decode');
+  }
+
+  req.session.destroy((err) => {
+    if (err) {
+      logger.error("Session destruction failed:", err);
+      return res.status(500).send('Failed to logout');
+    }
+
+    logger.info('Deleting cookie');
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    logger.info('Cookie set to expire at:', twoHoursAgo);
+
+    // Clear the cookie by setting an expired date
+    res.cookie('token', '', { expires: twoHoursAgo, httpOnly: true, secure: true, path: '/' });
+    logger.info('Redirecting to home');
+
+    res.redirect('/'); // Redirect to the login page or home page
+  });
+});
+
+router.get('/set-cookie', (req, res) => {
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+  res.cookie('token', '', { expires: twoHoursAgo, httpOnly: true, secure: false, path: '/' });
+  res.send('Cookie has been set to expire 2 hours ago');
+});
+
+// router.get("/validate-token", (req, res) => {
+//   const token = req.cookies.token;
+//   if (!token) {
+//     return res.status(401).json({ valid: false, msg: "No token provided" });
+//   }
+
+//   try {
+//     let tokenValidate = jwt.verify(token, process.env.JWT_SECRET);
+//     logger.info('tokenValidate', tokenValidate);
+//     res.json({ valid: true });
+//   } catch (error) {
+//     res.status(401).json({ valid: false, msg: "Invalid token" });
+//   }
+// });
+
 router.get("/validate-token", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -165,10 +216,27 @@ router.get("/validate-token", (req, res) => {
   }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ valid: true });
+    let decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    logger.info('Token validated successfully:', decodedToken);
+
+    // Convert Unix timestamps to human-readable format
+    const readableIAT = new Date(decodedToken.iat * 1000).toLocaleString(); // Converts Issued At to readable date
+    const readableEXP = new Date(decodedToken.exp * 1000).toLocaleString(); // Converts Expiration Time to readable date
+
+    logger.info(`iat  ${readableIAT}`);
+    logger.info(`exp, ${readableEXP}`);
+
+    res.json({
+      valid: true,
+      iat: readableIAT,
+      exp: readableEXP
+    });
   } catch (error) {
-    res.status(401).json({ valid: false, msg: "Invalid token" });
+    logger.error('Error validating token:', error.message);
+    return res.status(401).json({
+      valid: false,
+      msg: error instanceof jwt.TokenExpiredError ? "Token has expired" : "Invalid token"
+    });
   }
 });
 
