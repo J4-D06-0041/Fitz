@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const AuthService = require("../services/authService");
 const userService = require("../services/userService");
 const Attendance = require("../models/Attendance");
 const moment = require("moment-timezone");
@@ -22,8 +23,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).send({ msg: "User already exists" });
     }
     try {
-      let userToSave = { firstName, lastName, email, role, username, password, userTimezone, clientTimezone };
-      let savedUser = await userService.addUser(userToSave);
+      await AuthService.register(firstName, lastName, email, role, username, password, userTimezone, clientTimezone);
 
       res.status(200).send({ msg: "User registered successfully" });
     } catch (error) {
