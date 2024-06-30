@@ -53,12 +53,10 @@ router.post("/login", async (req, res) => {
         return res.status(401).send("Invalid credentials");
       }
       //add login time
-      let currentTime = moment().utc().toISOString();
       let clientTimeZone = user.clientTimezone;
       let clientTime = moment().utc().add(clientTimeZone, "hours").toISOString();
       let userTimeZone = user.userTimezone;
       let userTime = moment().utc().add(userTimeZone, "hours").toISOString();
-      let localTime = moment().tz("Asia/Singapore").add(8, "hours").toISOString();
 
       const attendance = {
         user: user._id,
@@ -114,45 +112,43 @@ router.post("/logout", authMiddleware, async (req, res) => {
     logger.info("Attendance record found:", attendance);
 
     // add logout time
-    const userOffset = user.timezone;
-    const phTimeLogout = moment().tz("Asia/Singapore").add(8, "hours").format("YYYY-MM-DD HH:mm:ss");
-    const tzConverter = -8;
-    const userTimeLogout = moment()
-      .utcOffset(userOffset * 60)
-      .subtract(tzConverter, "hours")
-      .format("YYYY-MM-DD HH:mm:ss");
+    let clientTimeZone = user.clientTimezone;
+    let clientLogoutTime = moment().utc().add(clientTimeZone, "hours").toISOString();
+    let userTimeZone = user.userTimezone;
+    let userLogoutTime = moment().utc().add(userTimeZone, "hours").toISOString();
 
-    logger.info("phTimeLogout:", phTimeLogout);
-    logger.info("userTimeLogout:", userTimeLogout);
+    logger.info("clientLogoutTime:", clientLogoutTime);
+    logger.info("userLogoutTime:", userLogoutTime);
 
     // Calculate total time
-    const loginTime = moment(attendance.loginTime);
-    const logoutTime = moment(userTimeLogout);
+    const loginTime = moment(attendance.userLoginTime);
+    const logoutTime = moment(userLogoutTime);
     const totalTime = moment.duration(logoutTime.diff(loginTime)).asHours();
 
     logger.info("Calculated totalTime:", totalTime);
 
-    attendance.logoutTime = userTimeLogout;
-    attendance.phTimeLogout = phTimeLogout;
-    attendance.totalTime = totalTime;
+    attendance = {
+      user: user._id,
+      clientLogoutTime: clientLogoutTime,
+      userLogoutTime: userLogoutTime,
+      totalWorkTime: totalTime
+    };
+    let attendanceResponse = await attendanceService.logAttendance(attendance);
 
     await attendance.save();
 
     console.log("Updated attendance record:", attendance);
 
-    res.clearCookie("token");
-    
+
     res.json({ msg: "User logged out successfully" });
+
+   
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 });
 
-// Registration page
-router.get("/register", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
-});
 
 router.get("/logout", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/private/logout.html"));
