@@ -3,21 +3,38 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("../utils/jwt");
 const userService = require("./userService");
+const logger = require("../logger");
 
 class AuthService {
-  async register(firstName, lastName, email, role, username, password, userTimezone, clientTimezone) {
-    const { firstName, lastName, email, role, timezone, username, password } = req.body;
-
+  async register(reqBody, res) {
+    const { firstName, lastName, email, role, username, password, userTimezone, clientTimezone } = reqBody;
     try {
-      let user = await userController.getUserByUsername(username);
-
-      if (user) {
+      let existingUser = await userService.getUserByUsername(username);
+      if (existingUser) {
         return res.status(400).json({ msg: "User already exists" });
       }
       try {
-        let userToSave = new User({ firstName, lastName, email, role, timezone, username, password });
-        let savedUser = await userController.addUser(userToSave);
-        res.json({ msg: "User registered successfully" });
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = {
+          firstName,
+          lastName,
+          email,
+          role,
+          username,
+          password: hashedPassword,
+          userTimezone,
+          clientTimezone
+        };
+
+          const savedUser = await userService.addUser(newUser);
+
+          const token = generateToken(savedUser);
+
+          res.json({ msg: "User registered successfully", token });
+
+
       } catch (error) {
         res.status(500).send(`Server error ${error}`);
       }
@@ -29,36 +46,39 @@ class AuthService {
 }
 
 module.exports = new AuthService();
+  
+// exports.register = async (req, res) => {
+//   const {firstName, lastName, email, role, username, password, userTimezone, clientTimezone} = req.body;
 
-exports.register = async (req, res) => {
-  const { username, password, role } = req.body;
+//   try {
+//     let user = await userService.getUserByUsername({ username });
 
-  try {
-    let user = await User.findOne({ username });
+//     if (user) {
+//       return res.status(400).json({ msg: "User already exists" });
+//     }
 
-    if (user) {
-      return res.status(400).json({ msg: "User already exists" });
-    }
+//     let userToSave = new User({     
+//       firstName, 
+//       lastName, 
+//       email, 
+//       role, 
+//       username, 
+//       password, 
+//       userTimezone, 
+//       clientTimezone
+//     });
 
-    user = new User({
-      username,
-      password,
-      role,
-    });
+//     await userService.addUser(userToSave);
+//     res.json({ msg: "User registered successfully" });
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+//     const token = generateToken(user);
+//     res.json({ token });
+//   } catch (err) {
+//     console.error(err.message);
+//     res.status(500).send("Server error");
+//   }
+// };
 
-    await user.save();
-
-    const token = generateToken(user);
-
-    res.json({ token });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-};
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;

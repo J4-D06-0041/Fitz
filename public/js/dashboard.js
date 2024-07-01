@@ -1,3 +1,5 @@
+import { register } from './register.js';
+
 document.getElementById("timelogLink").addEventListener("click", () => {
   fetch("/api/timelog/view")
     .then((response) => response.text())
@@ -38,9 +40,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const { role } = response.data;
 
     if(role !== "admin"){
-      document.getElementById("employeesLinkContainer").style.display = "none";
-    } else {
+      console.log("hello")
       document.getElementById("employeesLinkContainer").style.display = "block";
+    } else {
+      console.log("hello1")
+      document.getElementById("employeesLinkContainer").style.display = "none";
     } 
   } catch (error) {
     console.error("Error fetching user role:", error);
@@ -48,9 +52,19 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 document.getElementById("employeesLink").addEventListener("click", () => {
-  fetch("/api/employees/view")
+  document.getElementById("content").innerHTML = `
+    <div class="container">
+      <h1>Register an account.</h1>
+      <button id="register-btn-id" class="btn btn-primary">Go to register.</button>
+    </div>
+  `;
+
+  document.getElementById("register-btn-id").addEventListener("click", () => {
+    fetch("/api/users/register")
    .then((response) => response.text())
    .then((html) => {
       document.getElementById("content").innerHTML = html;
+      register();
     });
+  });
 });
