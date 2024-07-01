@@ -1,3 +1,5 @@
+import { register } from './register.js';
+
 document.getElementById("timelogLink").addEventListener("click", () => {
   fetch("/api/timelog/view")
     .then((response) => response.text())
@@ -53,7 +55,7 @@ document.getElementById("employeesLink").addEventListener("click", () => {
   document.getElementById("content").innerHTML = `
     <div class="container">
       <h1>Register an account.</h1>
-      <button id="register-btn-id" class="btn btn-primary">Register</button>
+      <button id="register-btn-id" class="btn btn-primary">Go to register.</button>
     </div>
   `;
 
@@ -62,6 +64,7 @@ document.getElementById("employeesLink").addEventListener("click", () => {
    .then((response) => response.text())
    .then((html) => {
       document.getElementById("content").innerHTML = html;
+      register();
     });
   });
 });

@@ -21,8 +21,8 @@ router.delete("/:id", authMiddleware, deleteUser);
 //Route to employees nav
 router.get("/register", authMiddleware, (req, res )=>{
   res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
-}
-)
+});
+
 router.get("/get-user-role", authMiddleware, (req, res) => {
   try {
     logger.info("Inside get-user-role");

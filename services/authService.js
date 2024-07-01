@@ -3,35 +3,36 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("../utils/jwt");
 const userService = require("./userService");
+const logger = require("../logger");
 
 class AuthService {
-  async register(firstName, lastName, email, role, username, password, userTimezone, clientTimezone) {
-    const { firstName, lastName, email, role, username, password, userTimezone, clientTimezone } = req.body;
-
+  async register(reqBody, res) {
+    const { firstName, lastName, email, role, username, password, userTimezone, clientTimezone } = reqBody;
     try {
-      let user = await userService.getUserByUsername(username);
-
-      if (user) {
+      let existingUser = await userService.getUserByUsername(username);
+      if (existingUser) {
         return res.status(400).json({ msg: "User already exists" });
       }
       try {
-        let userToSave = new User({
-          firstName, 
-          lastName, 
-          email, 
-          role, 
-          username, 
-          password, 
-          userTimezone, 
-          clientTimezone 
-        });
         const salt = await bcrypt.genSalt(10);
-        userToSave.password = await bcrypt.hash(password, salt);
-        let savedUser = await userService.addUser(userToSave);
-        res.json({ msg: "User registered successfully" });
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        const token = generateToken(userToSave);
-        res.json({ token });
+        const newUser = {
+          firstName,
+          lastName,
+          email,
+          role,
+          username,
+          password: hashedPassword,
+          userTimezone,
+          clientTimezone
+        };
+
+          const savedUser = await userService.addUser(newUser);
+
+          const token = generateToken(savedUser);
+
+          res.json({ msg: "User registered successfully", token });
 
 
       } catch (error) {
@@ -46,6 +47,37 @@ class AuthService {
 
 module.exports = new AuthService();
   
+// exports.register = async (req, res) => {
+//   const {firstName, lastName, email, role, username, password, userTimezone, clientTimezone} = req.body;
+
+//   try {
+//     let user = await userService.getUserByUsername({ username });
+
+//     if (user) {
+//       return res.status(400).json({ msg: "User already exists" });
+//     }
+
+//     let userToSave = new User({     
+//       firstName, 
+//       lastName, 
+//       email, 
+//       role, 
+//       username, 
+//       password, 
+//       userTimezone, 
+//       clientTimezone
+//     });
+
+//     await userService.addUser(userToSave);
+//     res.json({ msg: "User registered successfully" });
+
+//     const token = generateToken(user);
+//     res.json({ token });
+//   } catch (err) {
+//     console.error(err.message);
+//     res.status(500).send("Server error");
+//   }
+// };
 
 
 exports.login = async (req, res) => {

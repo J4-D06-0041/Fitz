@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const authService = require("../services/authService")
 const jwt = require("jsonwebtoken");
 const path = require("path");
-const AuthService = require("../services/authService");
 const userService = require("../services/userService");
 const Attendance = require("../models/Attendance");
 const moment = require("moment-timezone");
@@ -14,25 +14,11 @@ const mongoose = require("mongoose");
 
 // Register a new user
 router.post("/register", async (req, res) => {
-  const { firstName, lastName, email, role, username, password, userTimezone, clientTimezone } = req.body;
-
   try {
-    let user = await userService.getUserByUsername(username);
-
-    if (user) {
-      return res.status(400).send({ msg: "User already exists" });
-    }
-    try {
-      await AuthService.register(firstName, lastName, email, role, username, password, userTimezone, clientTimezone);
-
-      res.status(200).send({ msg: "User registered successfully" });
-    } catch (error) {
-      logger.error("inside trycatch", error);
-      res.status(500).send(`Server error ${error}`);
-    }
-  } catch (err) {
-    logger.error("auth.js", err);
-    res.status(500).send(`Server error ${err}`);
+    await authService.register(req.body, res);
+  } catch (error) {
+    logger.error("Error registering user:", error);
+    res.status(500).json({ msg: "Server error" });
   }
 });
 
@@ -149,6 +135,9 @@ router.post("/logout", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/register", authMiddleware, (req, res )=>{
+  res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
+});
 
 router.get("/logout", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/private/logout.html"));
