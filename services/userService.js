@@ -128,7 +128,7 @@ class UserController {
 
         // Save the user to the database
         await user.save();
-
+        logger.info(`User registered successfully ${user}`);
         resolve(user);
       } catch (error) {
         logger.error(error);
