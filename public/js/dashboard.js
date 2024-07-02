@@ -1,4 +1,27 @@
 import { register } from './register.js';
+import { usersTable } from './getUsers.js';
+const userPage = () => {
+  fetch("/api/users/get-users")
+    .then((response) => response.text())
+    .then((html) => {
+      document.getElementById("display-container").innerHTML = html;
+      usersTable();
+    })
+    .catch((error) => {
+      console.error("Error fetching users list:", error);
+    });
+};
+const registrationPage = () => {
+  fetch("/api/users/register")
+    .then((response) => response.text())
+    .then((html) => {
+      document.getElementById("display-container").innerHTML = html;
+      register(); 
+    })
+    .catch((error) => {
+      console.error("Error fetching registration form:", error);
+    });
+};
 
 document.getElementById("timelogLink").addEventListener("click", () => {
   fetch("/api/timelog/view")
@@ -53,18 +76,18 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 document.getElementById("employeesLink").addEventListener("click", () => {
   document.getElementById("content").innerHTML = `
-    <div class="container">
-      <h1>Register an account.</h1>
-      <button id="register-btn-id" class="btn btn-primary">Go to register.</button>
+      <div class="container">
+      <div class="btn-group mb-3" role="group">
+        <button id="register-btn-id" class="btn btn-primary">Go to register</button>
+        <button id="show-user-btn-id" class="btn btn-primary">Show users</button>
+      </div>
+      <div id="display-container"></div>
     </div>
   `;
-
   document.getElementById("register-btn-id").addEventListener("click", () => {
-    fetch("/api/users/register")
-   .then((response) => response.text())
-   .then((html) => {
-      document.getElementById("content").innerHTML = html;
-      register();
-    });
+    registrationPage();
+  });
+  document.getElementById("show-user-btn-id").addEventListener("click", () => {
+    userPage();
   });
 });

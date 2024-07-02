@@ -38,7 +38,7 @@ export function register() {
       }
     } catch (error) {
       console.error("Error registering user:", error);
-      document.getElementById("message").innerText = `Registration failed. Please try again.\n${error.message}`;
+      document.getElementById("message").innerText = `Registration failed. Please input a different username and try again.`;
     }
   });
 }

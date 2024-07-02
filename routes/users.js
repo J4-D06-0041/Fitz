@@ -7,7 +7,14 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 
 // Route to get all users
-router.get("/", authMiddleware, getAllUsers);
+router.get("/get-all-users", async (req, res) => {
+  try {
+    const users = await getAllUsers();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ msg: 'Server error', error: error.message });
+  }
+});
 
 // Route to get a specific user by ID
 router.get("/getuser/:id", authMiddleware, getUserById);
@@ -21,6 +28,10 @@ router.delete("/:id", authMiddleware, deleteUser);
 //Route to employees nav
 router.get("/register", authMiddleware, (req, res )=>{
   res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
+});
+
+router.get("/get-users", authMiddleware, (req, res )=>{
+  res.sendFile(path.join(__dirname, "../public/pages/public/getUsers.html"));
 });
 
 router.get("/get-user-role", authMiddleware, (req, res) => {
