@@ -27,6 +27,7 @@ app.use("/api/payrate", require("./routes/payrate"));
 app.use("/api/main", require("./routes/dashboard"));
 app.use("/api/timelog", require("./routes/timelog"));
 app.use("/api/pay", require("./routes/pay"));
+app.use("/api/mail", require("./routes/mail"));
 
 // Serve static files from the public directory
 app.use("/pages/private", authMiddleware, express.static(path.join(__dirname, "public/pages/private")));
