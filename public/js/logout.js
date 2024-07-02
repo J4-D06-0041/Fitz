@@ -31,29 +31,29 @@ async function fetchUserDetails() {
   }
 }
 
+async function logout() {
+  try {
+    const response = await axios.get("/api/auth/set-cookie");
+    window.location.href = "/";
+    if (!response.data) {
+      throw new Error("Failed to fetch user timezone");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user timezone:", error);
+    return null;
+  }
+}
+
 document.getElementById("logoutLink").addEventListener("click", async function () {
-  try { 
+  try {
     const userDetails = await fetchUserDetails();
     console.log("userDetails", userDetails);
     setInterval(() => updateTime(userDetails.user.clientTimezone, userDetails.user.userTimezone), 1000);
     document.addEventListener("DOMContentLoaded", function () {
       updateTime(timezone);
-      document.getElementById("logoutBtnId").addEventListener("click", async function () {
-
-        try {
-          const response = await axios.get("/api/auth/set-cookie");
-          console.log('response', response);
-          if (!response.data) {
-            throw new Error("Failed to fetch user timezone");
-          }
-          return response.data;
-        } catch (error) {
-          console.error("Error fetching user timezone:", error);
-          return null;
-        }
-      });
     });
-  }catch (error){
+  } catch (error) {
     console.error("Logout Error: ", error);
   }
 });
