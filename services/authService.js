@@ -14,8 +14,8 @@ class AuthService {
         return res.status(400).json({ msg: "User already exists" });
       }
       try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // const salt = await bcrypt.genSalt(10);
+        // const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = {
           firstName,
@@ -23,18 +23,16 @@ class AuthService {
           email,
           role,
           username,
-          password: hashedPassword,
+          password,
           userTimezone,
-          clientTimezone
+          clientTimezone,
         };
 
-          const savedUser = await userService.addUser(newUser);
+        const savedUser = await userService.addUser(newUser);
 
-          const token = generateToken(savedUser);
+        const token = generateToken(savedUser);
 
-          res.json({ msg: "User registered successfully", token });
-
-
+        res.json({ msg: "User registered successfully" });
       } catch (error) {
         res.status(500).send(`Server error ${error}`);
       }
@@ -46,7 +44,7 @@ class AuthService {
 }
 
 module.exports = new AuthService();
-  
+
 // exports.register = async (req, res) => {
 //   const {firstName, lastName, email, role, username, password, userTimezone, clientTimezone} = req.body;
 
@@ -57,14 +55,14 @@ module.exports = new AuthService();
 //       return res.status(400).json({ msg: "User already exists" });
 //     }
 
-//     let userToSave = new User({     
-//       firstName, 
-//       lastName, 
-//       email, 
-//       role, 
-//       username, 
-//       password, 
-//       userTimezone, 
+//     let userToSave = new User({
+//       firstName,
+//       lastName,
+//       email,
+//       role,
+//       username,
+//       password,
+//       userTimezone,
 //       clientTimezone
 //     });
 
@@ -78,7 +76,6 @@ module.exports = new AuthService();
 //     res.status(500).send("Server error");
 //   }
 // };
-
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
