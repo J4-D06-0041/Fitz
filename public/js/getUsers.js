@@ -1,7 +1,7 @@
 async function usersTable() {
   try {
     const response = await fetch("/api/users/get-all-users");
-    console.log('response')
+    console.log("response");
     if (!response.ok) {
       throw new Error("Failed to fetch users");
     }
@@ -11,8 +11,8 @@ async function usersTable() {
 
     const usersTable = document.getElementById("users-table");
     const tbody = usersTable.querySelector(".tbody");
-    
-    users.forEach(user => {
+
+    users.forEach((user) => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${user.firstName}</td>
@@ -23,20 +23,20 @@ async function usersTable() {
         <td>${user.userTimezone}</td>
         <td>${user.clientTimezone}</td>
         <td>${user.dateCreated}</td>
-        <td><button class="delete-btn">Delete</button></td>
+        <td><button class="delete-btn btn btn-danger">Delete</button></td>
       `;
-      document.querySelectorAll('.delete-btn').forEach((deleteBtn) => { 
-      deleteBtn.addEventListener('click', (event)=>{
-        const row = event.target.closest('tr');
-        row.remove();
+      document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
+        deleteBtn.addEventListener("click", (event) => {
+          const row = event.target.closest("tr");
+          row.remove();
+        });
       });
-    });
-      console.log(users)
+      console.log(users);
       tbody.appendChild(row);
     });
   } catch (error) {
     console.error("Error fetching users:", error);
   }
-};
+}
 
 export { usersTable };
