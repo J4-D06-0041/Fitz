@@ -85,18 +85,21 @@ class UserController {
   }
 
   async deleteUserByUsername(username) {
+    logger.info(`inside deleteUserByUsername(${username})`)
     return new Promise(async (resolve, reject) => {
       try {
+        logger.info(`finding user`);
         let user = await User.find({ username: username });
         if (!user) {
+          logger.info(`user not found`);
           reject("User not found");
         }
-
-        await User.findByIdAndRemove({ username: username });
-
+        logger.info(`user found`);
+        await User.findOneAndDelete({username});
+        logger.info(`user removed`);
         resolve("User removed");
       } catch (error) {
-        console.error(err.message);
+        logger.error(`error on deleteUserByUsername ${error}`);
         reject("Server error", error);
       }
     });

@@ -27,9 +27,11 @@ router.delete("/:id", authMiddleware, deleteUser);
 
 router.delete('/username/:username', async (req, res) => {
   try {
+    logger.info(`inside /username/:username`);
     const result = await deleteUserByUsername(req.params.username);
     res.json({ msg: result });
   } catch (error) {
+    logger.info(`something wrong here ${error}`);
     res.status(500).json({ msg: 'Server error', error: error.message });
   }
 });
