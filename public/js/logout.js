@@ -31,6 +31,20 @@ async function fetchUserDetails() {
   }
 }
 
+async function fetchAttendanceByUser() {
+  try {
+    console.log(`fetchAttendanceByUser userId`);
+    const response = await axios.get(`/api/attendance/user`);
+    if (!response.data) {
+      throw new Error("Failed to fetch fetchAttendanceByUser");
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching fetchAttendanceByUser:", error);
+    return null;
+  }
+}
+
 async function logout() {
   try {
     const response = await axios.get("/api/auth/set-cookie");
@@ -49,6 +63,8 @@ document.getElementById("logoutLink").addEventListener("click", async function (
   try {
     const userDetails = await fetchUserDetails();
     console.log("userDetails", userDetails);
+    const attendanceDetails = await fetchAttendanceByUser();
+    console.log("attendanceDetails", attendanceDetails);
     setInterval(() => updateTime(userDetails.user.clientTimezone, userDetails.user.userTimezone), 1000);
     document.addEventListener("DOMContentLoaded", function () {
       updateTime(timezone);
