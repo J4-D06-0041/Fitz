@@ -23,17 +23,29 @@ async function usersTable() {
         <td>${user.userTimezone}</td>
         <td>${user.clientTimezone}</td>
         <td>${user.dateCreated}</td>
-        <td><button class="delete-btn btn btn-danger">Delete</button></td>
+        <td>${user.status}</td>
+        <td><button class="delete-btn btn btn-danger" data-username="${user.username}">Delete</button></td>
       `;
-      document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
-        deleteBtn.addEventListener("click", (event) => {
-          const row = event.target.closest("tr");
-          row.remove();
-        });
-      });
-      console.log(users);
       tbody.appendChild(row);
     });
+      document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
+        deleteBtn.addEventListener("click", async (event) => {
+          const username = event.target.getAttribute("data-username");
+          try{
+            const response = await fetch(`/api/users/username/${username}`, {
+              method: "DELETE",
+            });
+            
+            if (!response.ok){
+              throw new Error("Failed to delete user");
+            }
+            const row = event.target.closest("tr");
+            row.remove();
+          }catch (error){
+            console.log("error:", error)
+          }
+        });
+      });
   } catch (error) {
     console.error("Error fetching users:", error);
   }

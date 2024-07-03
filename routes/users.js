@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
-const { getAllUsers, getUserById, updateUser, deleteUser } = require("../services/userService");
+const { getAllUsers, getUserById, updateUser, deleteUser, deleteUserByUsername} = require("../services/userService");
 const logger = require("../logger");
 const jwt = require("jsonwebtoken");
 const path = require("path");
@@ -24,6 +24,15 @@ router.put("/:id", authMiddleware, updateUser);
 
 // Route to delete a user
 router.delete("/:id", authMiddleware, deleteUser);
+
+router.delete('/username/:username', async (req, res) => {
+  try {
+    const result = await deleteUserByUsername(req.params.username);
+    res.json({ msg: result });
+  } catch (error) {
+    res.status(500).json({ msg: 'Server error', error: error.message });
+  }
+});
 
 //Route to employees nav
 router.get("/register", authMiddleware, (req, res )=>{
