@@ -145,6 +145,18 @@ class UserController {
       } catch (error) {}
     });
   }
+
+  async updateUserStatusToInActive(userId) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await User.findByIdAndUpdate(userId, { status: "inactive" }, { new: true });
+        resolve();
+      } catch (error) {
+        logger.error(error);
+        reject("Server error", error);
+      }
+    });
+  }
 }
 
 module.exports = new UserController();
