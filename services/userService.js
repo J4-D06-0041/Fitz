@@ -44,27 +44,41 @@ class UserController {
     });
   }
 
-  async updateUser(userObject) {
-    return new Promise(async (resolve, reject) => {
-      const { username, role } = req.body;
-      const userFields = { firstName, lastName, email, role, timezone, username, password };
-
-      try {
-        await User.find({});
-        let user = await User.findById(userObject.id);
-        if (!user) {
-          reject("user not found");
-        }
-
-        user = await User.findByIdAndUpdate(userObject.id, { $set: userFields }, { new: true });
-
-        resolve(user);
-      } catch (error) {
-        console.error(err.message);
-        reject("Server error", error);
+  async updateUser(username, userObject) {
+    try {
+      const { firstName, lastName, email, role, newUsername, userTimezone, clientTimezone } = userObject;
+  
+      // Validate role
+      if (!['user', 'admin', 'auditor'].includes(role)) {
+        throw new Error('Invalid role specified');
       }
-    });
+  
+      // Validate timezones
+      const validTimezone = /^([+-]?)(1[0-2]|[0-9])$/;
+      if (!validTimezone.test(userTimezone) || !validTimezone.test(clientTimezone)) {
+        throw new Error('Invalid timezone format. Must be between -12 and +12.');
+      }
+  
+      const userFields = { firstName, lastName, email, role, username: newUsername, userTimezone, clientTimezone };
+  
+      let user = await User.findOne({ username });
+      if (!user) {
+        throw new Error("User not found");
+      }
+  
+      user = await User.findOneAndUpdate(
+        { username },
+        { $set: userFields },
+        { new: true }
+      );
+  
+      return user;
+    } catch (error) {
+      console.error("Error updating user:", error.message);
+      throw new Error("Server error");
+    }
   }
+  
 
   async deleteUser(userId) {
     return new Promise(async (resolve, reject) => {

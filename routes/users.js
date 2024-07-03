@@ -20,14 +20,26 @@ router.get("/get-all-users", async (req, res) => {
 router.get("/getuser/:id", authMiddleware, getUserById);
 
 // Route to update user details
-router.put("/:id", authMiddleware, updateUser);
+router.put("/update/:username", authMiddleware, async (req, res) => {
+  const { username } = req.params;
+  const userObject = req.body;
+
+  try {
+    const updatedUser = await updateUser(username, userObject);
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ msg: 'Server error', error: error.message });
+  }
+});
+
 
 // Route to delete a user
 router.delete("/:id", authMiddleware, deleteUser);
 
-router.delete('/username/:username', async (req, res) => {
+// Route to deleting a user using username
+router.delete('/delete/:username', authMiddleware, async (req, res) => {
   try {
-    logger.info(`inside /username/:username`);
+    logger.info(`inside /delete/:username`);
     const result = await deleteUserByUsername(req.params.username);
     res.json({ msg: result });
   } catch (error) {
