@@ -48,6 +48,11 @@ const UserSchema = new mongoose.Schema({
       type: Date,
     },
   },
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+  },
 });
 
 module.exports = mongoose.model("User", UserSchema);
