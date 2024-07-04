@@ -34,14 +34,42 @@ function sendEmail(receiver, message) {
 }
 
 // Example route that sends an email
+/**
+ * @swagger
+ * /send-email:
+ *   get:
+ *     summary: Send an email
+ *     description: Sends an email to the specified receiver.
+ *     tags:
+ *       - Email
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Email sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Email sent!
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get("/send-email", authMiddleware, function (req, res) {
   const receiver = "intex.jero@gmail.com";
   const message = "Hello, this is a test email!";
   try {
     sendEmail(receiver, message);
-    res.send("Email sent!");
+    res.status(200).json({ message: "Email sent!" });
   } catch (error) {
     logger.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

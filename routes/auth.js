@@ -13,6 +13,38 @@ let attendanceService = require("../services/attendanceService");
 const mongoose = require("mongoose");
 
 // Register a new user
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User registered successfully
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ */
 router.post("/register", async (req, res) => {
   try {
     await authService.register(req.body, res);
@@ -23,6 +55,32 @@ router.post("/register", async (req, res) => {
 });
 
 // Login a user
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login a user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Server error
+ */
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   console.log("login", username, password);
@@ -79,6 +137,32 @@ router.post("/login", async (req, res) => {
 });
 
 //logout
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       400:
+ *         description: Invalid credentials or no attendance record found
+ *       500:
+ *         description: Server error
+ */
 router.post("/logout", authMiddleware, async (req, res) => {
   const { username } = req.body;
 
@@ -135,14 +219,62 @@ router.post("/logout", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/register", authMiddleware, (req, res )=>{
-  res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
+/**
+ * @swagger
+ * /api/auth/register:
+ *   get:
+ *     summary: Render the register page
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Register page rendered successfully
+ *       500:
+ *         description: Server error
+ */
+router.get("/register", authMiddleware, (req, res) => {
+  try {
+    res.sendFile(path.join(__dirname, "../public/pages/public/register.html"));
+  } catch (error) {
+    logger.error("Error rendering register page:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
 });
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   get:
+ *     summary: Render the logout page
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: Logout page rendered successfully
+ *       500:
+ *         description: Server error
+ */
 router.get("/logout", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/pages/private/logout.html"));
 });
 
+/**
+ * @swagger
+ * /api/auth/logoutuser:
+ *   get:
+ *     summary: Logout a user and clear session
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       500:
+ *         description: Server error
+ */
 router.get("/logoutuser", (req, res) => {
   logger.info("inside logoutuser");
 
@@ -173,6 +305,19 @@ router.get("/logoutuser", (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/auth/set-cookie:
+ *   get:
+ *     summary: Set a cookie with an expired date
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: Cookie has been set to expire 2 hours ago
+ *       500:
+ *         description: Server error
+ */
 router.get('/set-cookie', (req, res) => {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
   res.cookie('token', '', { expires: twoHoursAgo, httpOnly: true, secure: false, path: '/' });
@@ -194,6 +339,43 @@ router.get('/set-cookie', (req, res) => {
 //   }
 // });
 
+/**
+ * @swagger
+ * /api/auth/validate-token:
+ *   get:
+ *     summary: Validate a token
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token validated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                 iat:
+ *                   type: string
+ *                 exp:
+ *                   type: string
+ *       401:
+ *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                 msg:
+ *                   type: string
+ *     produces:
+ *       - application/json
+ */
 router.get("/validate-token", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
