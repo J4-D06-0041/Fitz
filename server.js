@@ -4,6 +4,7 @@ const express = require("express");
 const connectDB = require("./config/db");
 const authMiddleware = require("./middlewares/authMiddleware");
 const cookieParser = require("cookie-parser");
+const { swaggerUi, swaggerDocs } = require("./swaggerConfig");
 
 // Load config
 dotenv.config();
@@ -18,6 +19,9 @@ app.use(cookieParser());
 
 // Init Middleware
 app.use(express.json({ extended: false }));
+
+// Swagger setup
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Define Routes
 app.use("/api/auth", require("./routes/auth"));
