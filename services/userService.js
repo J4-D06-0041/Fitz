@@ -44,6 +44,7 @@ class UserController {
     });
   }
 
+  
   async updateUser(username, userObject) {
     try {
       const { firstName, lastName, email, role, newUsername, userTimezone, clientTimezone } = userObject;
@@ -52,12 +53,7 @@ class UserController {
       if (!['user', 'admin', 'auditor'].includes(role)) {
         throw new Error('Invalid role specified');
       }
-  
-      // Validate timezones
-      const validTimezone = /^([+-]?)(1[0-2]|[0-9])$/;
-      if (!validTimezone.test(userTimezone) || !validTimezone.test(clientTimezone)) {
-        throw new Error('Invalid timezone format. Must be between -12 and +12.');
-      }
+
   
       const userFields = { firstName, lastName, email, role, username: newUsername, userTimezone, clientTimezone };
   

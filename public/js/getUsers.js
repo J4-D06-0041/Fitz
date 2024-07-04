@@ -11,6 +11,37 @@ async function usersTable() {
 
     tbody.innerHTML = "";
 
+
+    const timezones = [
+      { value: "-12", text: "UTC-12 (Baker Island Time)" },
+      { value: "-11", text: "UTC-11 (Samoa Time)" },
+      { value: "-10", text: "UTC-10 (Hawaii-Aleutian Time)" },
+      { value: "-9", text: "UTC-9 (Alaska Time)" },
+      { value: "-8", text: "UTC-8 (Pacific Time)" },
+      { value: "-7", text: "UTC-7 (Mountain Time)" },
+      { value: "-6", text: "UTC-6 (Central Time)" },
+      { value: "-5", text: "UTC-5 (Eastern Time)" },
+      { value: "-4", text: "UTC-4 (Atlantic Time)" },
+      { value: "-3", text: "UTC-3 (West Africa Time)" },
+      { value: "-2", text: "UTC-2 (Mid-Atlantic Time)" },
+      { value: "-1", text: "UTC-1 (Greenwich Mean Time)" },
+      { value: "+0", text: "UTC+0 (Coordinated Universal Time)" },
+      { value: "+1", text: "UTC+1 (Central European Time)" },
+      { value: "+2", text: "UTC+2 (Eastern European Time)" },
+      { value: "+3", text: "UTC+3 (Moscow Time)" },
+      { value: "+4", text: "UTC+4 (Astrakhan Time)" },
+      { value: "+5", text: "UTC+5 (Pakistan Time)" },
+      { value: "+6", text: "UTC+6 (Bangladesh Time)" },
+      { value: "+7", text: "UTC+7 (Krasnoyarsk Time)" },
+      { value: "+8", text: "UTC+8 (China Standard Time)" },
+      { value: "+9", text: "UTC+9 (Japan Standard Time)" },
+      { value: "+10", text: "UTC+10 (Australian Western Standard Time)" },
+      { value: "+11", text: "UTC+11 (Solomon Islands Time)" },
+      { value: "+12", text: "UTC+12 (Kiribati Time)" },
+      { value: "+13", text: "UTC+13 (Samoa Time)" },
+      { value: "+14", text: "UTC+14 (Line Islands Time)" },
+    ];
+
     users.forEach((user) => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -28,11 +59,15 @@ async function usersTable() {
         </td>
         <td>
           <span class="user-info">${user.userTimezone}</span>
-          <input class="edit-input" type="text" value="${user.userTimezone}" pattern="^[+-]?([0-9]|1[0-2])$" style="display:none;">
+          <select class="edit-input" style="display:none;">
+            ${timezones.map(tz => `<option value="${tz.value}" ${user.userTimezone === tz.value ? 'selected' : ''}>${tz.text}</option>`).join('')}
+          </select>
         </td>
         <td>
           <span class="user-info">${user.clientTimezone}</span>
-          <input class="edit-input" type="text" value="${user.clientTimezone}" pattern="^[+-]?([0-9]|1[0-2])$" style="display:none;">
+          <select class="edit-input" style="display:none;">
+            ${timezones.map(tz => `<option value="${tz.value}" ${user.clientTimezone === tz.value ? 'selected' : ''}>${tz.text}</option>`).join('')}
+          </select>
         </td>
         <td>${user.dateCreated}</td>
         <td>${user.status}</td>
@@ -44,19 +79,21 @@ async function usersTable() {
 
     document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
       deleteBtn.addEventListener("click", async (event) => {
-        const username = event.target.getAttribute("data-username");
-        try {
-          const deleteResponse = await fetch(`/api/users/delete/${username}`, {
-            method: "DELETE",
-          });
+        if (confirm("Are you sure you want to delete this user?")) {
+          const username = event.target.getAttribute("data-username");
+          try {
+            const deleteResponse = await fetch(`/api/users/delete/${username}`, {
+              method: "DELETE",
+            });
 
-          if (!deleteResponse.ok) {
-            throw new Error("Failed to delete user");
+            if (!deleteResponse.ok) {
+              throw new Error("Failed to delete user");
+            }
+            const row = event.target.closest("tr");
+            row.remove();
+          } catch (error) {
+            console.log("error:", error);
           }
-          const row = event.target.closest("tr");
-          row.remove();
-        } catch (error) {
-          console.log("error:", error);
         }
       });
     });
@@ -72,7 +109,7 @@ async function usersTable() {
           userInfo.forEach(span => span.style.display = "none");
           editInputs.forEach(input => input.style.display = "block");
           event.target.innerText = "Save";
-        } else {
+        } else if (confirm("Are you sure you want to save changes?")) {
           const newUser = {
             firstName: editInputs[0].value,
             lastName: editInputs[1].value,
@@ -83,13 +120,8 @@ async function usersTable() {
             clientTimezone: editInputs[6].value,
           };
 
-          try {
-            // Validate timezones on the client side
-            const validTimezone = /^[+-]?([0-9]|1[0-2])$/;
-            if (!validTimezone.test(newUser.userTimezone) || !validTimezone.test(newUser.clientTimezone)) {
-              throw new Error('Invalid timezone format. Must be between -12 and +12.');
-            }
 
+         try {
             const updateResponse = await fetch(`/api/users/update/${oldUsername}`, {
               method: "PUT",
               headers: {
